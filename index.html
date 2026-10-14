@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="ultramarine">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>techdoc7 · Dev lab</title>
+<meta name="description" content="Browser experiments by Ujjawal Asthana: BlockForge 3D, Sprout2D and Python Code Studio. One click to open any of them.">
+<meta name="theme-color" content="#2B3FE0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%8A%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* ------------------------------------------------------------------
+   Tokens. Four themes share the same variable names; the cube, tiles,
+   toys and cursor all read from these.
+------------------------------------------------------------------- */
+:root{
+  --bg:#2B3FE0; --ink:#0E1240; --paper:#F5F7FF;
+  --a1:#FFD23F; --a2:#5EE6B0; --a3:#FF6B57;
+  --muted:rgba(245,247,255,.9);
+  --pad:clamp(20px,5vw,72px);
+  --sans:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+[data-theme="plum"]{--bg:#4A1D78;--a1:#FFC857;--a2:#8EE3EF;--a3:#FF8FA3}
+[data-theme="forest"]{--bg:#0F5132;--a1:#F4D35E;--a2:#A7F3D0;--a3:#FFB4A2}
+[data-theme="ember"]{--bg:#B23A08;--a1:#FFE066;--a2:#9BF6FF;--a3:#FFD6E0}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{
+  margin:0;min-height:100vh;font-family:var(--sans);font-size:1.0625rem;line-height:1.5;
+  color:var(--paper);background-color:var(--bg);
+  background-image:
+    linear-gradient(rgba(245,247,255,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(245,247,255,.07) 1px,transparent 1px);
+  background-size:56px 56px;background-attachment:fixed;
+  transition:background-color .5s ease;
+  overflow-x:hidden;
+}
+h1,h2,h3,p{margin:0}
+a{color:inherit}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--paper);outline-offset:4px}
+.skip{position:absolute;left:-999px;top:8px;background:var(--paper);color:var(--ink);padding:10px 16px;border-radius:99px;z-index:100;font-weight:700}
+.skip:focus{left:12px}
+
+#stage{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+main,footer,header{position:relative;z-index:1}
+.wrap{max-width:1240px;margin-inline:auto;padding-inline:var(--pad)}
+
+/* ---------------- header ---------------- */
+.top{position:absolute;inset:0 0 auto 0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:22px var(--pad)}
+.brand{font-weight:800;font-size:1.25rem;letter-spacing:-.02em;text-decoration:none;display:flex;align-items:center;gap:10px}
+.brand i{width:18px;height:18px;background:var(--a1);border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:block;transition:transform .4s}
+.brand:hover i{transform:rotate(90deg)}
+.nav{display:flex;gap:6px}
+.nav a{padding:8px 14px;border-radius:99px;text-decoration:none;font-weight:600;transition:background .2s,color .2s}
+.nav a:hover{background:var(--paper);color:var(--ink)}
+
+/* ---------------- hero ---------------- */
+.hero{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:120px var(--pad) 72px}
+.headline{font-size:clamp(2.5rem,6vw,5.6rem);line-height:.95;letter-spacing:-.035em;font-weight:800;font-variation-settings:"opsz" 96;max-width:11em}
+.ln{display:block;overflow:hidden;padding-bottom:.1em;margin-bottom:-.1em}
+.ln>span{display:inline-block;transform:translateY(110%);animation:rise .9s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(.2s + var(--i)*.13s)}
+@keyframes rise{to{transform:none}}
+.intro{margin-top:26px;font-size:clamp(1.05rem,1.6vw,1.3rem);max-width:34ch;color:var(--muted)}
+.launch{margin-top:34px;display:flex;flex-wrap:wrap;gap:12px;max-width:640px}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:12px 18px 12px 14px;border-radius:99px;background:var(--paper);color:var(--ink);font-weight:700;text-decoration:none;box-shadow:4px 4px 0 var(--ink);transition:transform .15s,box-shadow .15s}
+.pill:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink)}
+.pill:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.pill b{width:14px;height:14px;border:2px solid var(--ink);display:block}
+.pill:nth-child(1) b{background:var(--a1)}.pill:nth-child(2) b{background:var(--a2);border-radius:50%}.pill:nth-child(3) b{background:var(--a3);transform:rotate(45deg)}
+kbd{font-family:var(--mono);font-size:.78rem;font-weight:700;border:2px solid currentColor;border-radius:6px;padding:0 6px;line-height:1.4}
+.hero-foot{margin-top:22px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;color:var(--muted);font-size:.95rem}
+.link-btn{background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px;cursor:pointer;font-weight:600}
+.link-btn:hover{text-decoration-color:var(--a1)}
+
+/* ---------------- sections ---------------- */
+.section{padding:clamp(72px,10vw,140px) 0}
+h2{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1;letter-spacing:-.03em;font-weight:800;font-variation-settings:"opsz" 96}
+.lede{margin-top:14px;font-size:1.2rem;color:var(--muted);max-width:40ch}
+.grid,.toys{margin-top:44px;display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(18px,2.6vw,36px)}
+
+/* ---------------- project tiles ---------------- */
+.tile{position:relative;display:flex;flex-direction:column;background:var(--tile,var(--paper));color:var(--ink);border-radius:28px;box-shadow:8px 8px 0 var(--ink);text-decoration:none;
+  transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translate(var(--tx,0),var(--ty,0));
+  transition:transform .18s ease-out,box-shadow .18s ease-out}
+.tile:hover,.tile:focus-visible{--tx:-4px;--ty:-4px;box-shadow:14px 14px 0 var(--ink)}
+.t-block{grid-column:span 7;--tile:var(--a1)}
+.t-sprout{grid-column:span 5;--tile:var(--a2)}
+.t-python{grid-column:span 5;--tile:var(--paper)}
+.t-next{grid-column:span 7}
+.preview{height:230px;margin:14px 14px 0;border-radius:18px;background:rgba(14,18,64,.1);overflow:hidden;position:relative}
+.t-block .preview{height:260px}
+.tile-body{padding:22px 26px 96px}
+.tile h3{font-size:clamp(1.6rem,2.6vw,2.3rem);line-height:1.05;letter-spacing:-.02em;font-weight:800}
+.tile p{margin-top:8px;max-width:36ch;font-size:1.05rem}
+.go{position:absolute;right:20px;bottom:20px;width:54px;height:54px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;transition:transform .25s}
+.tile:hover .go,.tile:focus-visible .go{transform:rotate(-45deg)}
+.go svg{width:24px;height:24px}
+
+/* mini CSS cube */
+.scene{perspective:700px;display:grid;place-items:center;height:100%}
+.mc{--s:104px;width:var(--s);height:var(--s);position:relative;transform-style:preserve-3d;transform:rotateX(-24deg) rotateY(30deg);animation:mcspin 10s linear infinite}
+.tile:hover .mc{animation-duration:3.2s}
+.mc i{position:absolute;inset:0;border:3px solid var(--ink);background:rgba(245,247,255,.6)}
+.mc i:nth-child(1){transform:translateZ(calc(var(--s)/2))}
+.mc i:nth-child(2){transform:rotateY(90deg) translateZ(calc(var(--s)/2))}
+.mc i:nth-child(3){transform:rotateY(180deg) translateZ(calc(var(--s)/2))}
+.mc i:nth-child(4){transform:rotateY(-90deg) translateZ(calc(var(--s)/2))}
+.mc i:nth-child(5){transform:rotateX(90deg) translateZ(calc(var(--s)/2));background:var(--a3)}
+.mc i:nth-child(6){transform:rotateX(-90deg) translateZ(calc(var(--s)/2))}
+@keyframes mcspin{to{transform:rotateX(-24deg) rotateY(390deg)}}
+
+/* sprout */
+.sprout{width:100%;height:100%;display:block}
+.sp-line{stroke:var(--ink);fill:none;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.sp-leaf{fill:var(--paper);stroke:var(--ink);stroke-width:4;stroke-linejoin:round;transform-box:fill-box}
+.sp-leaf.l1{transform-origin:100% 100%;animation:leaf 5s infinite}
+.sp-leaf.l2{transform-origin:0% 100%;animation:leaf 5s infinite .5s}
+.sp-bud{fill:var(--a3);stroke:var(--ink);stroke-width:4;transform-box:fill-box;transform-origin:50% 50%;animation:bud 5s infinite}
+.sp-stem{stroke-dasharray:100;animation:stem 5s infinite}
+.sp-all{animation:spfade 5s infinite}
+.tile:hover .sp-all,.tile:hover .sp-all *{animation-duration:2.6s}
+@keyframes stem{0%{stroke-dashoffset:100}35%,100%{stroke-dashoffset:0}}
+@keyframes leaf{0%,28%{transform:scale(0)}46%,100%{transform:scale(1)}}
+@keyframes bud{0%,50%{transform:scale(0)}62%,100%{transform:scale(1)}}
+@keyframes spfade{0%,90%{opacity:1}100%{opacity:0}}
+
+/* python mini editor */
+.win{height:100%;padding:14px 16px;font-family:var(--mono);font-size:.92rem;color:var(--ink)}
+.dots{display:flex;gap:6px;margin-bottom:12px}
+.dots i{width:11px;height:11px;border-radius:50%;border:2px solid var(--ink)}
+.win pre{margin:0;font:inherit;white-space:pre-wrap;min-height:2.9em}
+.caret{display:inline-block;width:.6ch;height:1.1em;background:var(--ink);vertical-align:text-bottom;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.pyout{margin-top:10px!important;padding:8px 10px;background:var(--ink);color:var(--a2);border-radius:8px;min-height:2.6em}
+
+/* "next" tile */
+.tile.t-next{background:transparent;color:var(--paper);box-shadow:none;border:3px dashed rgba(245,247,255,.75);justify-content:center;padding:28px 28px 28px;min-height:200px}
+.tile.t-next:hover,.tile.t-next:focus-visible{box-shadow:none;background:rgba(245,247,255,.08);border-style:solid}
+.t-next .tile-body{padding:0 70px 0 0}
+.t-next .plus{position:absolute;right:26px;bottom:26px;width:54px;height:54px;transition:transform .35s}
+.t-next:hover .plus{transform:rotate(90deg)}
+
+/* ---------------- playground ---------------- */
+.toy{border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.toy h3{font-size:1.5rem;letter-spacing:-.02em;font-weight:800;line-height:1.1}
+.toy .sub{font-size:.98rem;opacity:.92}
+.toy-term{grid-column:span 7;background:var(--ink);color:var(--paper)}
+.toy-paint{grid-column:span 5;background:var(--paper);color:var(--ink)}
+.toy-color{grid-column:span 5;border:3px solid var(--paper)}
+.toy-idea{grid-column:span 7;background:var(--a1);color:var(--ink)}
+.toy-paint :focus-visible,.toy-idea :focus-visible{outline-color:var(--ink)}
+
+.term{font-family:var(--mono);font-size:.9rem;line-height:1.55;border:2px solid rgba(245,247,255,.35);border-radius:14px;padding:12px 14px;cursor:text}
+.term-log{height:250px;overflow:auto;overscroll-behavior:contain}
+.tl{white-space:pre-wrap;word-break:break-word}
+.tl.cmd{color:var(--a1)}.tl.err{color:var(--a3)}.tl.dim{opacity:.75}
+.term-row{display:flex;gap:8px;margin-top:6px}
+.term-row span{color:var(--a2);font-weight:700}
+.term-row input{flex:1;min-width:0;background:none;border:0;outline:0;font-family:inherit;font-size:inherit}
+.term-row input:focus-visible{outline:0}
+.term:focus-within{border-color:var(--paper)}
+
+#pixels{width:100%;max-width:312px;aspect-ratio:1;display:block;border:3px solid var(--ink);border-radius:6px;touch-action:none;background:#E9ECFF;image-rendering:pixelated}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tok{width:34px;height:34px;border-radius:50%;border:3px solid var(--ink);cursor:pointer;padding:0}
+.tok[aria-pressed="true"]{box-shadow:0 0 0 3px var(--paper),0 0 0 6px var(--ink)}
+.tok[data-tok="a1"]{background:var(--a1)}.tok[data-tok="a2"]{background:var(--a2)}.tok[data-tok="a3"]{background:var(--a3)}
+.tok[data-tok="ink"]{background:var(--ink)}.tok[data-tok="paper"]{background:var(--paper)}
+.tok[data-tok="erase"]{background:repeating-linear-gradient(45deg,#fff 0 5px,#ddd 5px 10px)}
+.btn{border:2px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:99px;padding:8px 16px;font-weight:700;cursor:pointer;transition:transform .12s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:inherit}
+.check{display:inline-flex;gap:8px;align-items:center;font-weight:600;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--ink)}
+
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.swatch{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:var(--sw);color:#F5F7FF;border:3px solid var(--ink);font-weight:700;cursor:pointer;box-shadow:3px 3px 0 var(--ink);transition:transform .12s}
+.swatch:hover{transform:translate(-2px,-2px)}
+.swatch[aria-pressed="true"]{border-color:var(--paper);box-shadow:0 0 0 3px var(--ink)}
+.swatch .d{display:flex}.swatch .d i{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);margin-right:-4px}
+.ctl{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.ctl label{display:flex;gap:10px;align-items:center;font-weight:600}
+.ctl input[type=range]{accent-color:var(--a1);width:140px}
+.toy-color .btn{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+
+.idea-text{font-size:clamp(1.4rem,2.6vw,2rem);line-height:1.15;letter-spacing:-.02em;font-weight:700;min-height:3.6em}
+.idea-tag{display:inline-block;font-family:var(--mono);font-weight:700;font-size:.85rem;border:2px solid var(--ink);border-radius:99px;padding:2px 12px;margin-top:10px}
+.idea-tag:empty{display:none}
+.dice{display:inline-block}
+.dice.spin{animation:spin .6s cubic-bezier(.3,.7,.3,1)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------------- now ---------------- */
+.now-grid{display:grid;grid-template-columns:5fr 7fr;gap:clamp(24px,5vw,80px);align-items:start}
+.now-list{list-style:none;margin:0;padding:0}
+.now-list li{display:flex;gap:18px;align-items:baseline;flex-wrap:wrap;padding:18px 0;border-top:2px solid rgba(245,247,255,.5);transition:padding-left .25s}
+.now-list li:last-child{border-bottom:2px solid rgba(245,247,255,.5)}
+.now-list li:hover{padding-left:18px}
+.now-list b{font-size:clamp(1.6rem,3vw,2.4rem);letter-spacing:-.02em;font-weight:800;min-width:5.2ch}
+.now-list span{color:var(--muted)}
+
+/* ---------------- footer ---------------- */
+.foot{padding:clamp(60px,9vw,120px) 0 48px}
+.loop{font-size:clamp(2.6rem,9vw,8rem);line-height:.95;font-weight:800;letter-spacing:-.04em;font-variation-settings:"opsz" 96}
+.loop span{display:inline-block;margin-right:.25em}
+.js .loop span{opacity:0;transform:translateY(40%);transition:opacity .6s ease,transform .7s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--i)*.12s)}
+.js .loop span.in{opacity:1;transform:none}
+.foot-row{margin-top:48px;display:flex;flex-wrap:wrap;gap:16px 32px;justify-content:space-between;align-items:center;border-top:2px solid rgba(245,247,255,.5);padding-top:24px;color:var(--muted)}
+.foot-row a{font-weight:700;color:var(--paper)}
+
+/* ---------------- cursor + effects ---------------- */
+.c-dot,.c-ring{display:none;position:fixed;left:0;top:0;pointer-events:none;z-index:10000;opacity:0;transition:opacity .2s;mix-blend-mode:difference}
+.has-cursor .c-dot,.has-cursor .c-ring{display:block}
+.c-dot{width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:#fff}
+.c-ring-in{position:absolute;left:0;top:0;width:38px;height:38px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);display:grid;place-items:center;transition:width .25s,height .25s,background .25s,border-color .25s,transform .15s}
+.c-ring.is-hover .c-ring-in{width:60px;height:60px}
+.c-ring.is-down .c-ring-in{transform:translate(-50%,-50%) scale(.82)}
+.c-ring.is-label{mix-blend-mode:normal}
+.c-ring.is-label .c-ring-in{width:92px;height:92px;background:var(--ink);border-color:var(--paper)}
+.c-label{font-size:.82rem;font-weight:800;color:var(--paper);opacity:0;transition:opacity .15s}
+.c-ring.is-label .c-label{opacity:1}
+.has-cursor,.has-cursor *{cursor:none!important}
+.spark{position:fixed;width:9px;height:9px;pointer-events:none;z-index:9999}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,24px);background:var(--paper);color:var(--ink);font-weight:700;padding:12px 20px;border-radius:99px;box-shadow:4px 4px 0 var(--ink);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:200;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------------- responsive ---------------- */
+@media (max-width:900px){
+  .t-block,.t-sprout,.t-python,.t-next,.toy-term,.toy-paint,.toy-color,.toy-idea{grid-column:span 12}
+  .now-grid{grid-template-columns:1fr}
+  .nav a:not(:last-child){display:none}
+  .hero{padding-top:110px}
+}
+
+/* ---------------- reduced motion ---------------- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .ln>span{transform:none}
+  .sp-stem{stroke-dashoffset:0}
+  .sp-leaf,.sp-bud{transform:none}
+  .mc{transform:rotateX(-24deg) rotateY(30deg)}
+  .js .loop span{opacity:1;transform:none}
+}
+</style>
+</head>
+
+<body>
+<a class="skip" href="#projects">Skip to projects</a>
+<canvas id="stage" aria-hidden="true"></canvas>
+
+<header class="top">
+  <a class="brand" href="#" aria-label="techdoc7, back to top"><i></i>techdoc7</a>
+  <nav class="nav" aria-label="Page">
+    <a href="#projects">Projects</a>
+    <a href="#playground">Playground</a>
+    <a href="#now">Now</a>
+    <a href="https://github.com/techdoc7" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<main>
+  <!-- ================= HERO ================= -->
+  <section class="hero" aria-labelledby="h1">
+    <h1 class="headline" id="h1">
+      <span class="ln" style="--i:0"><span>Things I build</span></span>
+      <span class="ln" style="--i:1"><span>to find out</span></span>
+      <span class="ln" style="--i:2"><span>how they work.</span></span>
+    </h1>
+    <p class="intro">Ujjawal Asthana, student developer. Games, tools and 3D experiments that run right in your browser.</p>
+
+    <div class="launch" role="group" aria-label="Open a project">
+      <a class="pill" href="BlockForge%203D.html"><b></b>BlockForge 3D <kbd aria-hidden="true">1</kbd></a>
+      <a class="pill" href="sprout2d.html"><b></b>Sprout2D <kbd aria-hidden="true">2</kbd></a>
+      <a class="pill" href="python-code-studio.html"><b></b>Python Code Studio <kbd aria-hidden="true">3</kbd></a>
+    </div>
+
+    <div class="hero-foot">
+      <span>Press 1, 2 or 3 to jump straight in.</span>
+      <button class="link-btn" id="scatterBtn" type="button">Scatter the blocks</button>
+    </div>
+  </section>
+
+  <!-- ================= PROJECTS ================= -->
+  <section class="section" id="projects" aria-labelledby="projects-h">
+    <div class="wrap">
+      <h2 id="projects-h">Projects</h2>
+      <p class="lede">Pick one. Each opens in a single click.</p>
+
+      <div class="grid">
+        <a class="tile t-block" href="BlockForge%203D.html" data-cursor="Open">
+          <div class="preview" aria-hidden="true">
+            <div class="scene"><div class="mc"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+          </div>
+          <div class="tile-body">
+            <h3>BlockForge 3D</h3>
+            <p>Build with blocks in three dimensions. Place, stack and spin your creation.</p>
+          </div>
+          <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+
+        <a class="tile t-sprout" href="sprout2d.html" data-cursor="Open">
+          <div class="preview" aria-hidden="true">
+            <svg class="sprout" viewBox="0 0 160 140" preserveAspectRatio="xMidYMid meet">
+              <g class="sp-all">
+                <path class="sp-line" d="M24 120H136"/>
+                <path class="sp-line sp-stem" pathLength="100" d="M80 120C80 98 78 80 82 58"/>
+                <path class="sp-leaf l1" d="M81 80C60 80 50 66 48 52C66 52 80 62 81 80Z"/>
+                <path class="sp-leaf l2" d="M82 68C100 68 112 56 114 42C96 42 83 52 82 68Z"/>
+                <circle class="sp-bud" cx="82" cy="52" r="7"/>
+              </g>
+            </svg>
+          </div>
+          <div class="tile-body">
+            <h3>Sprout2D</h3>
+            <p>A small 2D world where things grow.</p>
+          </div>
+          <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+
+        <a class="tile t-python" href="python-code-studio.html" data-cursor="Open">
+          <div class="preview" aria-hidden="true">
+            <div class="win">
+              <div class="dots"><i></i><i></i><i></i></div>
+              <pre><code id="pyType"></code><span class="caret"></span></pre>
+              <pre class="pyout" id="pyOut"></pre>
+            </div>
+          </div>
+          <div class="tile-body">
+            <h3>Python Code Studio</h3>
+            <p>Write Python and run it in the browser.</p>
+          </div>
+          <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+
+        <a class="tile t-next" href="https://github.com/techdoc7/Dev" target="_blank" rel="noopener" data-cursor="GitHub">
+          <div class="tile-body">
+            <h3>Next experiment</h3>
+            <p>Not built yet. Follow the repo on GitHub to see it land.</p>
+          </div>
+          <svg class="plus" viewBox="0 0 54 54" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M27 10v34M10 27h34"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PLAYGROUND ================= -->
+  <section class="section" id="playground" aria-labelledby="play-h">
+    <div class="wrap">
+      <h2 id="play-h">Playground</h2>
+      <p class="lede">Small toys that live on this page. Poke around.</p>
+
+      <div class="toys">
+        <article class="toy toy-term">
+          <h3>Terminal</h3>
+          <p class="sub">Type <b>help</b> to see what it understands.</p>
+          <div class="term" id="term">
+            <div class="term-log" id="termLog" role="log" aria-live="polite"></div>
+            <label class="term-row"><span aria-hidden="true">$</span><input id="termIn" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal command"></label>
+          </div>
+        </article>
+
+        <article class="toy toy-paint">
+          <h3>Pixel painter</h3>
+          <p class="sub">Draw with a mouse or finger. Your art recolors with the page.</p>
+          <canvas id="pixels" aria-label="Pixel canvas, 12 by 12 squares. Draw with a mouse or touch."></canvas>
+          <div class="tools" id="tokens" role="group" aria-label="Paint color">
+            <button class="tok" data-tok="a1" aria-pressed="true" aria-label="Color 1"></button>
+            <button class="tok" data-tok="a2" aria-pressed="false" aria-label="Color 2"></button>
+            <button class="tok" data-tok="a3" aria-pressed="false" aria-label="Color 3"></button>
+            <button class="tok" data-tok="ink" aria-pressed="false" aria-label="Dark"></button>
+            <button class="tok" data-tok="paper" aria-pressed="false" aria-label="Light"></button>
+            <button class="tok" data-tok="erase" aria-pressed="false" aria-label="Eraser"></button>
+          </div>
+          <div class="tools">
+            <label class="check"><input type="checkbox" id="mirror" checked> Mirror</label>
+            <button class="btn ghost" id="pxRandom" type="button">Random</button>
+            <button class="btn ghost" id="pxClear" type="button">Clear</button>
+            <button class="btn" id="pxSave" type="button">Save PNG</button>
+          </div>
+        </article>
+
+        <article class="toy toy-color">
+          <h3>Recolor everything</h3>
+          <p class="sub">The cube, the tiles and the cursor all follow the theme.</p>
+          <div class="swatches" role="group" aria-label="Color theme">
+            <button class="swatch" data-theme="ultramarine" style="--sw:#2B3FE0" aria-pressed="true"><span class="d"><i style="background:#FFD23F"></i><i style="background:#5EE6B0"></i><i style="background:#FF6B57"></i></span>Ultramarine</button>
+            <button class="swatch" data-theme="plum" style="--sw:#4A1D78" aria-pressed="false"><span class="d"><i style="background:#FFC857"></i><i style="background:#8EE3EF"></i><i style="background:#FF8FA3"></i></span>Plum</button>
+            <button class="swatch" data-theme="forest" style="--sw:#0F5132" aria-pressed="false"><span class="d"><i style="background:#F4D35E"></i><i style="background:#A7F3D0"></i><i style="background:#FFB4A2"></i></span>Forest</button>
+            <button class="swatch" data-theme="ember" style="--sw:#B23A08" aria-pressed="false"><span class="d"><i style="background:#FFE066"></i><i style="background:#9BF6FF"></i><i style="background:#FFD6E0"></i></span>Ember</button>
+          </div>
+          <div class="ctl">
+            <label>Cube speed <input type="range" id="speed" min="0" max="3" step="0.1" value="1"></label>
+            <button class="btn" id="scatterBtn2" type="button">Scatter the blocks</button>
+          </div>
+        </article>
+
+        <article class="toy toy-idea">
+          <h3>Idea machine</h3>
+          <p class="sub">Stuck on what to build next? Roll for a small project.</p>
+          <p class="idea-text" id="ideaText" aria-live="polite">Press the button for a project idea.</p>
+          <span class="idea-tag" id="ideaTag"></span>
+          <div class="tools"><button class="btn" id="rollIdea" type="button"><span class="dice" id="dice" aria-hidden="true">⚄</span> Roll an idea</button></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= NOW ================= -->
+  <section class="section" id="now" aria-labelledby="now-h">
+    <div class="wrap now-grid">
+      <div>
+        <h2 id="now-h">Right now</h2>
+        <p class="lede">What I'm learning, and what I use it for.</p>
+      </div>
+      <ul class="now-list">
+        <li><b>C</b><span>Learning how programs really work, one small program at a time.</span></li>
+        <li><b>Python</b><span>Tools, games and the first steps into AI.</span></li>
+        <li><b>Pygame</b><span>Game loops, sprites and collisions in 2D.</span></li>
+        <li><b>AI</b><span>Exploring how machines learn from examples.</span></li>
+        <li><b>Git</b><span>Shipping experiments in small, honest commits.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p class="loop" aria-label="Learn. Build. Improve. Repeat.">
+      <span style="--i:0">Learn.</span> <span style="--i:1">Build.</span> <span style="--i:2">Improve.</span> <span style="--i:3">Repeat.</span>
+    </p>
+    <div class="foot-row">
+      <a href="https://github.com/techdoc7" target="_blank" rel="noopener">github.com/techdoc7</a>
+      <span>Made with HTML, CSS and three.js.</span>
+    </div>
+  </div>
+</footer>
+
+<div class="c-dot" id="cDot"></div>
+<div class="c-ring" id="cRing"><div class="c-ring-in"><span class="c-label" id="cLabel"></span></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+'use strict';
+
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const root = document.documentElement;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+const css = v => getComputedStyle(root).getPropertyValue(v).trim();
+const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+root.classList.add('js');
+
+/* ------------------------------------------------------------------
+   Edit this list when you add a project. Keys 1-3 and the terminal's
+   "open" command both read from it.
+------------------------------------------------------------------- */
+const PROJECTS = [
+  { name: 'BlockForge 3D',      href: 'BlockForge%203D.html',   key: '1', names: ['blockforge', 'blockforge3d', 'block'] },
+  { name: 'Sprout2D',           href: 'sprout2d.html',          key: '2', names: ['sprout', 'sprout2d'] },
+  { name: 'Python Code Studio', href: 'python-code-studio.html', key: '3', names: ['python', 'studio', 'pythoncodestudio'] },
+];
+const THEMES = ['ultramarine', 'plum', 'forest', 'ember'];
+
+/* ---------------- toast ---------------- */
+const toastEl = $('#toast'); let toastTimer;
+function toast(msg) {
+  toastEl.textContent = msg; toastEl.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
+}
+
+/* ---------------- ideas ---------------- */
+const ideas = (() => {
+  const list = [
+    { text: 'A snake that gets faster every time it eats, and leaves a block behind.', tag: 'Pygame' },
+    { text: 'A typing game where words fall like rain and you clear them by typing.', tag: 'JavaScript' },
+    { text: 'A tiny weather log in C that reads temperatures from a file and draws an ASCII graph.', tag: 'C' },
+    { text: 'A maze generator you solve by clicking, with a hint button.', tag: 'JavaScript' },
+    { text: 'A chatbot that only answers in rhymes.', tag: 'Python, AI' },
+    { text: 'A bouncing-ball sandbox where you can flip gravity.', tag: 'Pygame' },
+    { text: 'A flashcard app that remembers which cards you miss.', tag: 'Python' },
+    { text: 'Conway\'s Game of Life with patterns you can paint.', tag: 'JavaScript' },
+    { text: 'A text adventure in C where the map is a 2D array.', tag: 'C' },
+    { text: 'A small neural net that learns to tell your drawn 0s from 1s.', tag: 'Python, AI' },
+    { text: 'A focus timer that grows a sprout while you work.', tag: 'JavaScript' },
+    { text: 'A voxel painter that exports builds to BlockForge 3D.', tag: 'JavaScript, 3D' },
+    { text: 'A rock-paper-scissors bot that learns your habits.', tag: 'Python, AI' },
+    { text: 'A boss-fight prototype with three attack patterns and a health bar.', tag: 'Pygame' },
+  ];
+  let bag = [];
+  return { next() {
+    if (!bag.length) bag = list.map((_, i) => i).sort(() => Math.random() - 0.5);
+    return list[bag.pop()];
+  } };
+})();
+
+/* ------------------------------------------------------------------
+   3D cube (three.js). One InstancedMesh of small blocks that fly
+   together on load, follow the pointer, and scatter on click.
+------------------------------------------------------------------- */
+const cube = (() => {
+  const api = { recolor() {}, scatter() {}, rainbow() {}, setSpeed() {} };
+  const canvas = $('#stage');
+  if (!window.THREE) { canvas.hidden = true; return api; }
+
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true }); }
+  catch (err) { canvas.hidden = true; return api; }
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  camera.position.set(0, 0, 17);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+  const key = new THREE.DirectionalLight(0xffffff, 0.9); key.position.set(5, 9, 8); scene.add(key);
+  const fill = new THREE.PointLight(0xffffff, 0.5); fill.position.set(-8, -4, 6); scene.add(fill);
+
+  const rand = (() => { let a = 7; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; })();
+
+  const N = 5, STEP = 1.1, items = [];
+  for (let x = 0; x < N; x++) for (let y = 0; y < N; y++) for (let z = 0; z < N; z++) {
+    const corner = [x, y, z].every(v => v === 0 || v === N - 1);
+    if (!corner && rand() < 0.14) continue;
+    const dir = new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize();
+    items.push({
+      home: new THREE.Vector3((x - (N - 1) / 2) * STEP, (y - (N - 1) / 2) * STEP, (z - (N - 1) / 2) * STEP),
+      dir, scatter: dir.clone().multiplyScalar(9 + rand() * 6),
+      delay: rand() * 0.9, phase: rand() * 6.28,
+      spin: new THREE.Vector3(rand() * 6, rand() * 6, rand() * 6),
+      tone: (x * 7 + y * 13 + z * 5) % 4,
+    });
+  }
+
+  const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), new THREE.MeshStandardMaterial({ roughness: 0.45, metalness: 0.05 }), items.length);
+  const group = new THREE.Group(); group.add(mesh); scene.add(group);
+
+  let rainbowUntil = 0;
+  api.recolor = () => {
+    const pal = [css('--a1'), css('--a2'), css('--a3'), css('--paper')].map(c => new THREE.Color(c));
+    const rb = performance.now() < rainbowUntil;
+    const c = new THREE.Color();
+    items.forEach((it, i) => mesh.setColorAt(i, rb ? c.setHSL((i * 0.037) % 1, 0.8, 0.6) : pal[it.tone]));
+    mesh.instanceColor.needsUpdate = true;
+  };
+  api.rainbow = () => { rainbowUntil = performance.now() + 8000; api.recolor(); setTimeout(api.recolor, 8100); };
+
+  let e = 0, eTarget = 0, speed = 1, spinY = 0, mx = 0, my = 0, tmx = 0, tmy = 0, baseOpacity = 1;
+  api.setSpeed = v => { speed = v; };
+  api.scatter = () => { eTarget = 1; setTimeout(() => { eTarget = 0; }, 650); };
+
+  addEventListener('pointermove', ev => { tmx = (ev.clientX / innerWidth - 0.5) * 2; tmy = (ev.clientY / innerHeight - 0.5) * 2; }, { passive: true });
+
+  function resize() {
+    const w = innerWidth, h = innerHeight, wide = w >= 900;
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+    group.position.set(wide ? 4.2 : 0, wide ? 0 : 1.8, 0);
+    group.scale.setScalar(wide ? 1 : 0.72);
+    baseOpacity = wide ? 1 : 0.5;
+  }
+  addEventListener('resize', resize); resize();
+
+  const easeOutBack = x => { x = Math.min(1, Math.max(0, x)); const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+  const dummy = new THREE.Object3D(), tmp = new THREE.Vector3();
+  const t0 = performance.now(); let last = t0;
+
+  function frame(now) {
+    requestAnimationFrame(frame);
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const vh = innerHeight;
+    const fade = 1 - Math.min(1, Math.max(0, (scrollY - vh * 0.35) / (vh * 0.8)));
+    canvas.style.opacity = (fade * baseOpacity).toFixed(3);
+    if (fade <= 0 || document.hidden) return;
+
+    const time = (now - t0) / 1000;
+    e += (eTarget - e) * Math.min(1, dt * 5);
+    mx += (tmx - mx) * Math.min(1, dt * 3);
+    my += (tmy - my) * Math.min(1, dt * 3);
+    if (!reduce) spinY += dt * 0.35 * speed;
+    group.rotation.y = spinY + mx * 0.7 + scrollY * 0.002;
+    group.rotation.x = 0.45 + my * 0.35;
+
+    items.forEach((it, i) => {
+      const p = reduce ? 1 : easeOutBack((time - it.delay) / 1.4);
+      tmp.copy(it.scatter).lerp(it.home, p).addScaledVector(it.dir, e * 5);
+      dummy.position.copy(tmp);
+      dummy.rotation.set(it.spin.x * (1 - Math.min(p, 1)) + it.spin.x * e * 0.5, it.spin.y * (1 - Math.min(p, 1)) + it.spin.y * e * 0.5, it.spin.z * e * 0.5);
+      const pulse = reduce ? 1 : 1 + 0.07 * Math.sin(time * 2 + it.phase);
+      dummy.scale.setScalar(Math.max(0.0001, Math.min(1, p)) * pulse);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(frame);
+  return api;
+})();
+
+/* ---------------- theme ---------------- */
+let theme = 'ultramarine';
+function setTheme(name) {
+  if (!THEMES.includes(name)) return false;
+  theme = name; root.dataset.theme = name;
+  try { localStorage.setItem('techdoc7-theme', name); } catch (err) {}
+  $$('.swatch').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.theme === name)));
+  $('meta[name="theme-color"]').setAttribute('content', css('--bg'));
+  cube.recolor(); painter.redraw();
+  return true;
+}
+
+/* ---------------- pixel painter ---------------- */
+const painter = (() => {
+  const cv = $('#pixels'), ctx = cv.getContext('2d');
+  const G = 12, S = 24; cv.width = cv.height = G * S;
+  const grid = new Array(G * G).fill(null);
+  let tok = 'a1', drawing = false;
+  const colorOf = t => t === 'ink' ? css('--ink') : t === 'paper' ? css('--paper') : css('--' + t);
+
+  const art = ['............', '....gggg....', '...gggggg...', '.gg.gggg.gg.', '.ggggkkgggg.', '..gggkkggg..', '....gkkg....', '.....kk.....', '.....kk.....', '..yyyyyyyy..', '..yyyyyyyy..', '...yyyyyy...'];
+  art.forEach((row, r) => [...row].forEach((ch, c) => { grid[r * G + c] = { g: 'a2', k: 'ink', y: 'a1' }[ch] || null; }));
+
+  function redraw() {
+    ctx.fillStyle = '#E9ECFF'; ctx.fillRect(0, 0, cv.width, cv.height);
+    grid.forEach((t, i) => { if (t) { ctx.fillStyle = colorOf(t); ctx.fillRect((i % G) * S, Math.floor(i / G) * S, S, S); } });
+    ctx.strokeStyle = 'rgba(14,18,64,.12)'; ctx.lineWidth = 1; ctx.beginPath();
+    for (let i = 1; i < G; i++) { ctx.moveTo(i * S + .5, 0); ctx.lineTo(i * S + .5, cv.height); ctx.moveTo(0, i * S + .5); ctx.lineTo(cv.width, i * S + .5); }
+    ctx.stroke();
+  }
+  function paint(ev) {
+    const r = cv.getBoundingClientRect();
+    const x = Math.floor((ev.clientX - r.left) / r.width * G), y = Math.floor((ev.clientY - r.top) / r.height * G);
+    if (x < 0 || y < 0 || x >= G || y >= G) return;
+    const v = tok === 'erase' ? null : tok;
+    grid[y * G + x] = v;
+    if ($('#mirror').checked) grid[y * G + (G - 1 - x)] = v;
+    redraw();
+  }
+  cv.addEventListener('pointerdown', ev => { drawing = true; cv.setPointerCapture(ev.pointerId); paint(ev); });
+  cv.addEventListener('pointermove', ev => { if (drawing) paint(ev); });
+  addEventListener('pointerup', () => { drawing = false; });
+
+  $$('#tokens .tok').forEach(b => b.addEventListener('click', () => {
+    tok = b.dataset.tok;
+    $$('#tokens .tok').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+  }));
+  $('#pxClear').addEventListener('click', () => { grid.fill(null); redraw(); });
+  $('#pxRandom').addEventListener('click', () => {
+    const toks = ['a1', 'a2', 'a3', 'ink', 'paper']; grid.fill(null);
+    for (let y = 0; y < G; y++) for (let x = 0; x < G / 2; x++) if (Math.random() < 0.38) { const t = toks[Math.floor(Math.random() * toks.length)]; grid[y * G + x] = t; grid[y * G + (G - 1 - x)] = t; }
+    redraw();
+  });
+  $('#pxSave').addEventListener('click', () => {
+    const c = document.createElement('canvas'); c.width = c.height = G * 32; const x = c.getContext('2d');
+    grid.forEach((t, i) => { x.fillStyle = t ? colorOf(t) : '#F5F7FF'; x.fillRect((i % G) * 32, Math.floor(i / G) * 32, 32, 32); });
+    c.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'my-pixel-art.png'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); });
+    toast('Saved as my-pixel-art.png');
+  });
+  return { redraw };
+})();
+
+/* ---------------- terminal ---------------- */
+(() => {
+  const log = $('#termLog'), input = $('#termIn'), box = $('#term');
+  const hist = []; let hp = 0;
+  const out = (t, cls = '') => { const d = document.createElement('div'); d.className = 'tl ' + cls; d.textContent = t; log.appendChild(d); log.scrollTop = log.scrollHeight; };
+  const find = q => PROJECTS.find(p => [p.name, ...p.names].some(n => norm(n) === norm(q)));
+
+  const cmds = {
+    help() {
+      out('Commands:');
+      [['projects', 'list everything I built'], ['open <name>', 'launch a project'], ['theme <name>', THEMES.join(', ')], ['scatter', 'blow up the blocks'],
+       ['idea', 'get a project idea'], ['whoami', 'who made this'], ['date', 'what time is it'], ['clear', 'wipe the screen']]
+        .forEach(([a, b]) => out('  ' + a.padEnd(15) + b));
+    },
+    projects() { PROJECTS.forEach(p => out('  ' + p.name)); out('Type  open <name>  to launch one.', 'dim'); },
+    ls() { cmds.projects(); },
+    open(arg) {
+      if (!arg) return out('Open what? Try: open sprout2d', 'err');
+      const p = find(arg);
+      if (!p) return out(`No project called "${arg}". Type projects to see the list.`, 'err');
+      out('Opening ' + p.name + '...'); setTimeout(() => { location.href = p.href; }, 500);
+    },
+    theme(arg) {
+      if (!arg) return out('Themes: ' + THEMES.join(', '));
+      setTheme(norm(arg)) ? out('Theme set to ' + theme + '.') : out(`Unknown theme "${arg}".`, 'err');
+    },
+    scatter() { cube.scatter(); out('Boom.'); },
+    idea() { const i = ideas.next(); out(i.text); out('  [' + i.tag + ']', 'dim'); },
+    whoami() { out('techdoc7. Student developer. Learning C and Python, building things to see how they work.'); },
+    about() { cmds.whoami(); },
+    date() { out(new Date().toLocaleString()); },
+    clear() { log.textContent = ''; },
+    hello() { out('Hello, world.'); },
+    sudo() { out('Nice try. Permission denied.', 'err'); },
+  };
+
+  function run(line) {
+    const [name, ...rest] = line.trim().split(/\s+/);
+    out('$ ' + line, 'cmd');
+    const k = name.toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(cmds, k)) cmds[k](rest.join(' '));
+    else out(`Command not found: ${name}. Type help.`, 'err');
+  }
+  input.addEventListener('keydown', ev => {
+    if (ev.key === 'Enter' && input.value.trim()) { hist.push(input.value); hp = hist.length; run(input.value); input.value = ''; }
+    else if (ev.key === 'ArrowUp' && hist.length) { ev.preventDefault(); hp = Math.max(0, hp - 1); input.value = hist[hp]; }
+    else if (ev.key === 'ArrowDown' && hist.length) { ev.preventDefault(); hp = Math.min(hist.length, hp + 1); input.value = hist[hp] || ''; }
+  });
+  box.addEventListener('click', () => input.focus());
+  out('techdoc7 terminal. Type help to start.', 'dim');
+})();
+
+/* ---------------- idea machine ---------------- */
+$('#rollIdea').addEventListener('click', () => {
+  const i = ideas.next();
+  $('#ideaText').textContent = i.text; $('#ideaTag').textContent = i.tag;
+  const d = $('#dice'); d.classList.remove('spin'); void d.offsetWidth; d.classList.add('spin');
+});
+
+/* ---------------- theme + cube controls ---------------- */
+$$('.swatch').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.theme)));
+$('#speed').addEventListener('input', ev => cube.setSpeed(parseFloat(ev.target.value)));
+['#scatterBtn', '#scatterBtn2'].forEach(s => $(s).addEventListener('click', () => cube.scatter()));
+$('.hero').addEventListener('click', ev => { if (!ev.target.closest('a,button,kbd,input')) cube.scatter(); });
+
+/* ---------------- python tile typewriter ---------------- */
+(() => {
+  const el = $('#pyType'), outEl = $('#pyOut');
+  const snippets = [
+    { code: 'for i in range(3):\n    print("grow", i)', out: 'grow 0\ngrow 1\ngrow 2' },
+    { code: 'name = "techdoc7"\nprint(name.upper())', out: 'TECHDOC7' },
+    { code: 'blocks = [1, 2, 3]\nprint(sum(blocks))', out: '6' },
+  ];
+  if (reduce) { el.textContent = snippets[0].code; outEl.textContent = snippets[0].out; return; }
+  let si = 0;
+  function type(i) {
+    const s = snippets[si];
+    if (i <= s.code.length) { el.textContent = s.code.slice(0, i); setTimeout(() => type(i + 1), 45 + Math.random() * 40); }
+    else { outEl.textContent = s.out; setTimeout(() => { el.textContent = ''; outEl.textContent = ''; si = (si + 1) % snippets.length; type(0); }, 2400); }
+  }
+  type(0);
+})();
+
+/* ---------------- tile tilt ---------------- */
+if (!reduce && finePointer) $$('.tile').forEach(t => {
+  t.addEventListener('pointermove', ev => {
+    const r = t.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width - 0.5, py = (ev.clientY - r.top) / r.height - 0.5;
+    t.style.setProperty('--ry', (px * 7).toFixed(2) + 'deg');
+    t.style.setProperty('--rx', (-py * 7).toFixed(2) + 'deg');
+  });
+  t.addEventListener('pointerleave', () => { t.style.removeProperty('--rx'); t.style.removeProperty('--ry'); });
+});
+
+/* ---------------- footer words ---------------- */
+(() => {
+  const words = $$('.loop span');
+  if (reduce || !('IntersectionObserver' in window)) { words.forEach(w => w.classList.add('in')); return; }
+  const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }), { threshold: 0.6 });
+  words.forEach(w => io.observe(w));
+})();
+
+/* ---------------- keyboard: 1-3 launch, Konami unlock ---------------- */
+const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let kp = 0;
+addEventListener('keydown', ev => {
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName) || ev.target.isContentEditable;
+  if (typing || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+  const k = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
+  kp = k === KONAMI[kp] ? kp + 1 : (k === KONAMI[0] ? 1 : 0);
+  if (kp === KONAMI.length) { kp = 0; cube.rainbow(); cube.scatter(); toast('Cheat code accepted. Blocks unlocked.'); return; }
+  const p = PROJECTS.find(p => p.key === k);
+  if (p) { toast('Opening ' + p.name); setTimeout(() => { location.href = p.href; }, 250); }
+});
+
+/* ------------------------------------------------------------------
+   Custom cursor: dot + trailing ring. The ring grows over anything
+   clickable and shows a label over project tiles. Click for a burst
+   of little blocks.
+------------------------------------------------------------------- */
+(() => {
+  const dot = $('#cDot'), ring = $('#cRing'), label = $('#cLabel');
+  if (finePointer) {
+    root.classList.add('has-cursor');
+    let x = -100, y = -100, rx = x, ry = y, shown = false;
+    addEventListener('pointermove', ev => {
+      x = ev.clientX; y = ev.clientY;
+      if (!shown) { shown = true; rx = x; ry = y; dot.style.opacity = ring.style.opacity = 1; }
+      dot.style.transform = `translate3d(${x}px,${y}px,0)`;
+    }, { passive: true });
+    (function loop() { rx += (x - rx) * 0.18; ry += (y - ry) * 0.18; ring.style.transform = `translate3d(${rx}px,${ry}px,0)`; requestAnimationFrame(loop); })();
+    document.addEventListener('pointerover', ev => {
+      const lab = ev.target.closest('[data-cursor]');
+      ring.classList.toggle('is-label', !!lab);
+      if (lab) label.textContent = lab.dataset.cursor;
+      ring.classList.toggle('is-hover', !lab && !!ev.target.closest('a,button,input,canvas,label,summary'));
+    });
+    addEventListener('pointerdown', () => ring.classList.add('is-down'));
+    addEventListener('pointerup', () => ring.classList.remove('is-down'));
+    document.documentElement.addEventListener('mouseleave', () => { dot.style.opacity = ring.style.opacity = 0; shown = false; });
+  }
+  if (reduce) return;
+  addEventListener('pointerdown', ev => {
+    const cols = [css('--a1'), css('--a2'), css('--a3'), css('--paper')];
+    for (let i = 0; i < 9; i++) {
+      const s = document.createElement('i'); s.className = 'spark';
+      s.style.left = ev.clientX + 'px'; s.style.top = ev.clientY + 'px'; s.style.background = cols[i % 4];
+      document.body.appendChild(s);
+      const a = Math.random() * Math.PI * 2, d = 30 + Math.random() * 50;
+      s.animate([
+        { transform: 'translate(-50%,-50%) scale(1) rotate(0deg)', opacity: 1 },
+        { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d}px)) scale(.2) rotate(${Math.random() * 180}deg)`, opacity: 0 },
+      ], { duration: 600 + Math.random() * 300, easing: 'cubic-bezier(.2,.7,.3,1)' }).onfinish = () => s.remove();
+    }
+  });
+})();
+
+/* ---------------- init ---------------- */
+let saved = null;
+try { saved = localStorage.getItem('techdoc7-theme'); } catch (err) {}
+setTheme(THEMES.includes(saved) ? saved : 'ultramarine');
+})();
+</script>
+</body>
+</html>
