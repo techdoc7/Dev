@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>techdoc7 · Dev lab</title>
-<meta name="description" content="Browser experiments by Ujjawal Asthana: BlockForge 3D, Sprout2D and Python Code Studio. One click to open any of them.">
+<meta name="description" content="Browser experiments by Ujjawal Asthana: BlockForge 3D, Sprout2D, Apex Rush, Voxel Craft and Python Code Studio. One click to open any of them.">
 <meta name="theme-color" content="#2B3FE0">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%8A%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -74,6 +74,7 @@ main,footer,header{position:relative;z-index:1}
 .pill:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
 .pill b{width:14px;height:14px;border:2px solid var(--ink);display:block}
 .pill:nth-child(1) b{background:var(--a1)}.pill:nth-child(2) b{background:var(--a2);border-radius:50%}.pill:nth-child(3) b{background:var(--a3);transform:rotate(45deg)}
+.pill:nth-child(4) b{background:var(--a1);border-radius:50% 0}.pill:nth-child(5) b{background:var(--a2);transform:rotate(45deg);border-radius:3px}
 kbd{font-family:var(--mono);font-size:.78rem;font-weight:700;border:2px solid currentColor;border-radius:6px;padding:0 6px;line-height:1.4}
 .hero-foot{margin-top:22px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;color:var(--muted);font-size:.95rem}
 .link-btn{background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px;cursor:pointer;font-weight:600}
@@ -94,6 +95,8 @@ h2{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1;letter-spacing:-.03em;font-w
 .t-sprout{grid-column:span 5;--tile:var(--a2)}
 .t-python{grid-column:span 5;--tile:var(--paper)}
 .t-next{grid-column:span 7}
+.t-apex{grid-column:span 5;--tile:var(--a3)}
+.t-voxel{grid-column:span 7;--tile:var(--a1)}
 .preview{height:230px;margin:14px 14px 0;border-radius:18px;background:rgba(14,18,64,.1);overflow:hidden;position:relative}
 .t-block .preview{height:260px}
 .tile-body{padding:22px 26px 96px}
@@ -139,6 +142,21 @@ h2{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1;letter-spacing:-.03em;font-w
 .caret{display:inline-block;width:.6ch;height:1.1em;background:var(--ink);vertical-align:text-bottom;animation:blink 1s steps(2) infinite}
 @keyframes blink{50%{opacity:0}}
 .pyout{margin-top:10px!important;padding:8px 10px;background:var(--ink);color:var(--a2);border-radius:8px;min-height:2.6em}
+
+/* Apex Rush + Voxel Craft previews */
+.road{position:absolute;inset:0;background:var(--ink);overflow:hidden}
+.road:before{content:"";position:absolute;left:50%;top:-20%;bottom:-20%;width:8px;margin-left:-4px;background:repeating-linear-gradient(to bottom,var(--paper) 0 28px,transparent 28px 56px);animation:roadmove 1s linear infinite}
+.road:after{content:"";position:absolute;left:50%;bottom:26px;width:46px;height:78px;margin-left:-23px;border-radius:14px 14px 8px 8px;background:var(--a3);box-shadow:inset 0 0 0 4px var(--paper);transform:translateX(var(--car,0))}
+.tile:hover .road:before{animation-duration:.35s}
+@keyframes roadmove{to{transform:translateY(56px)}}
+.vox{position:absolute;inset:0;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(4,1fr);gap:4px;padding:16px;align-content:end}
+.vox i{border-radius:4px;background:var(--a2);box-shadow:inset 0 -8px 0 rgba(14,18,64,.28);transition:transform .25s}
+.vox i:nth-child(n+17){background:#B07A4A}
+.vox i:nth-child(n+25){background:#8A8F99}
+.vox i:nth-child(1),.vox i:nth-child(2),.vox i:nth-child(3),.vox i:nth-child(9){visibility:hidden}
+.tile:hover .vox i:nth-child(5){transform:translateY(-14px)}
+.tile:hover .vox i:nth-child(6){transform:translateY(-8px)}
+@media (prefers-reduced-motion:reduce){.road:before{animation:none}}
 
 /* "next" tile */
 .tile.t-next{background:transparent;color:var(--paper);box-shadow:none;border:3px dashed rgba(245,247,255,.75);justify-content:center;padding:28px 28px 28px;min-height:200px}
@@ -233,7 +251,7 @@ h2{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1;letter-spacing:-.03em;font-w
 
 /* ---------------- responsive ---------------- */
 @media (max-width:900px){
-  .t-block,.t-sprout,.t-python,.t-next,.toy-term,.toy-paint,.toy-color,.toy-idea{grid-column:span 12}
+  .t-block,.t-sprout,.t-python,.t-apex,.t-voxel,.t-next,.toy-term,.toy-paint,.toy-color,.toy-idea{grid-column:span 12}
   .now-grid{grid-template-columns:1fr}
   .nav a:not(:last-child){display:none}
   .hero{padding-top:110px}
@@ -279,10 +297,12 @@ h2{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1;letter-spacing:-.03em;font-w
       <a class="pill" href="BlockForge%203D.html"><b></b>BlockForge 3D <kbd aria-hidden="true">1</kbd></a>
       <a class="pill" href="sprout2d.html"><b></b>Sprout2D <kbd aria-hidden="true">2</kbd></a>
       <a class="pill" href="python-code-studio.html"><b></b>Python Code Studio <kbd aria-hidden="true">3</kbd></a>
+      <a class="pill" href="Apex%20Rush.html"><b></b>Apex Rush <kbd aria-hidden="true">4</kbd></a>
+      <a class="pill" href="Voxel%20Craft.html"><b></b>Voxel Craft <kbd aria-hidden="true">5</kbd></a>
     </div>
 
     <div class="hero-foot">
-      <span>Press 1, 2 or 3 to jump straight in.</span>
+      <span>Press 1 to 5 to jump straight in.</span>
       <button class="link-btn" id="scatterBtn" type="button">Scatter the blocks</button>
     </div>
   </section>
@@ -320,6 +340,24 @@ h2{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1;letter-spacing:-.03em;font-w
           <div class="tile-body">
             <h3>Sprout2D</h3>
             <p>A small 2D world where things grow.</p>
+          </div>
+          <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+
+        <a class="tile t-apex" href="Apex%20Rush.html" data-cursor="Open">
+          <div class="preview" aria-hidden="true"><div class="road"></div></div>
+          <div class="tile-body">
+            <h3>Apex Rush</h3>
+            <p>A fast 3D racing game. Pick a car, upgrade it, use nitro and race for the best lap.</p>
+          </div>
+          <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+
+        <a class="tile t-voxel" href="Voxel%20Craft.html" data-cursor="Open">
+          <div class="preview" aria-hidden="true"><div class="vox"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+          <div class="tile-body">
+            <h3>Voxel Craft</h3>
+            <p>A first-person block world. Mine, place and build with your own hotbar and inventory.</p>
           </div>
           <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
         </a>
@@ -461,13 +499,15 @@ const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
 root.classList.add('js');
 
 /* ------------------------------------------------------------------
-   Edit this list when you add a project. Keys 1-3 and the terminal's
+   Edit this list when you add a project. Keys 1-5 and the terminal's
    "open" command both read from it.
 ------------------------------------------------------------------- */
 const PROJECTS = [
   { name: 'BlockForge 3D',      href: 'BlockForge%203D.html',   key: '1', names: ['blockforge', 'blockforge3d', 'block'] },
   { name: 'Sprout2D',           href: 'sprout2d.html',          key: '2', names: ['sprout', 'sprout2d'] },
   { name: 'Python Code Studio', href: 'python-code-studio.html', key: '3', names: ['python', 'studio', 'pythoncodestudio'] },
+  { name: 'Apex Rush',          href: 'Apex%20Rush.html',        key: '4', names: ['apex', 'apexrush', 'race', 'racing'] },
+  { name: 'Voxel Craft',        href: 'Voxel%20Craft.html',      key: '5', names: ['voxel', 'voxelcraft', 'craft'] },
 ];
 const THEMES = ['ultramarine', 'plum', 'forest', 'ember'];
 
@@ -770,7 +810,7 @@ if (!reduce && finePointer) $$('.tile').forEach(t => {
   words.forEach(w => io.observe(w));
 })();
 
-/* ---------------- keyboard: 1-3 launch, Konami unlock ---------------- */
+/* ---------------- keyboard: 1-5 launch, Konami unlock ---------------- */
 const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 let kp = 0;
 addEventListener('keydown', ev => {
