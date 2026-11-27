@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>techdoc7 · Dev lab</title>
-<meta name="description" content="Browser experiments by Ujjawal Asthana: BlockForge 3D, Sprout2D, Apex Rush, Voxel Craft and Python Code Studio. One click to open any of them.">
+<meta name="description" content="Browser experiments by Ujjawal Asthana: BlockForge 3D, Sprout2D, Apex Rush, Voxel Craft, Skyline Flight Sim, M4 Coast Drive and Python Code Studio. One click to open any of them.">
 <meta name="theme-color" content="#2B3FE0">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%8A%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -94,6 +94,8 @@ h2{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1;letter-spacing:-.03em;font-w
 .t-block{grid-column:span 7;--tile:var(--a1)}
 .t-sprout{grid-column:span 5;--tile:var(--a2)}
 .t-python{grid-column:span 5;--tile:var(--paper)}
+.t-sky{grid-column:span 7;--tile:var(--a2)}
+.t-m4{grid-column:span 5;--tile:var(--a3)}
 .t-next{grid-column:span 7}
 .t-apex{grid-column:span 5;--tile:var(--a3)}
 .t-voxel{grid-column:span 7;--tile:var(--a1)}
@@ -157,6 +159,19 @@ h2{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1;letter-spacing:-.03em;font-w
 .tile:hover .vox i:nth-child(5){transform:translateY(-14px)}
 .tile:hover .vox i:nth-child(6){transform:translateY(-8px)}
 @media (prefers-reduced-motion:reduce){.road:before{animation:none}}
+
+/* Skyline Flight Sim + M4 Coast Drive previews */
+.sky-pv{position:absolute;inset:0;background:linear-gradient(to bottom,var(--ink) 0,var(--a1) 100%);overflow:hidden}
+.sky-pv:after{content:"";position:absolute;left:0;right:0;bottom:0;height:30%;background:repeating-linear-gradient(90deg,rgba(245,247,255,.14) 0 40px,transparent 40px 80px),var(--a2)}
+.sky-pv .plane{position:absolute;left:50%;top:38%;width:120px;height:92px;margin:-46px 0 0 -60px;background:var(--paper);clip-path:polygon(50% 0,58% 34%,100% 62%,100% 72%,58% 60%,56% 84%,72% 94%,72% 100%,50% 94%,28% 100%,28% 94%,44% 84%,42% 60%,0 72%,0 62%,42% 34%);animation:bank 4s ease-in-out infinite alternate}
+.tile:hover .sky-pv .plane{animation-duration:1.6s}
+@keyframes bank{from{transform:rotate(-8deg) translateY(-6px)}to{transform:rotate(8deg) translateY(6px)}}
+.coast-pv{position:absolute;inset:0;overflow:hidden;background:linear-gradient(to bottom,#F6C18B 0,#F08A6B 42%,var(--a1) 42%,var(--a1) 60%,var(--ink) 60%)}
+.coast-pv:before{content:"";position:absolute;left:0;right:-68px;top:82%;height:6px;background:repeating-linear-gradient(90deg,var(--paper) 0 34px,transparent 34px 68px);animation:coastmove 1s linear infinite}
+.coast-pv:after{content:"";position:absolute;left:50%;top:62%;width:112px;height:34px;margin-left:-56px;border-radius:16px 22px 8px 8px;background:var(--a3);box-shadow:inset 0 0 0 4px var(--paper)}
+.tile:hover .coast-pv:before{animation-duration:.35s}
+@keyframes coastmove{to{transform:translateX(-68px)}}
+@media (prefers-reduced-motion:reduce){.sky-pv .plane,.coast-pv:before{animation:none}}
 
 /* "next" tile */
 .tile.t-next{background:transparent;color:var(--paper);box-shadow:none;border:3px dashed rgba(245,247,255,.75);justify-content:center;padding:28px 28px 28px;min-height:200px}
@@ -251,7 +266,7 @@ h2{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1;letter-spacing:-.03em;font-w
 
 /* ---------------- responsive ---------------- */
 @media (max-width:900px){
-  .t-block,.t-sprout,.t-python,.t-apex,.t-voxel,.t-next,.toy-term,.toy-paint,.toy-color,.toy-idea{grid-column:span 12}
+  .t-block,.t-sprout,.t-python,.t-apex,.t-voxel,.t-sky,.t-m4,.t-next,.toy-term,.toy-paint,.toy-color,.toy-idea{grid-column:span 12}
   .now-grid{grid-template-columns:1fr}
   .nav a:not(:last-child){display:none}
   .hero{padding-top:110px}
@@ -299,10 +314,12 @@ h2{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1;letter-spacing:-.03em;font-w
       <a class="pill" href="python-code-studio.html"><b></b>Python Code Studio <kbd aria-hidden="true">3</kbd></a>
       <a class="pill" href="Apex%20Rush.html"><b></b>Apex Rush <kbd aria-hidden="true">4</kbd></a>
       <a class="pill" href="Voxel%20Craft.html"><b></b>Voxel Craft <kbd aria-hidden="true">5</kbd></a>
+      <a class="pill" href="Skyline%20Flight%20Sim.html"><b></b>Skyline Flight Sim <kbd aria-hidden="true">6</kbd></a>
+      <a class="pill" href="M4%20Coast%20Drive/index.html"><b></b>M4 Coast Drive <kbd aria-hidden="true">7</kbd></a>
     </div>
 
     <div class="hero-foot">
-      <span>Press 1 to 5 to jump straight in.</span>
+      <span>Press 1 to 7 to jump straight in.</span>
       <button class="link-btn" id="scatterBtn" type="button">Scatter the blocks</button>
     </div>
   </section>
@@ -373,6 +390,24 @@ h2{font-size:clamp(2.2rem,5vw,4.2rem);line-height:1;letter-spacing:-.03em;font-w
           <div class="tile-body">
             <h3>Python Code Studio</h3>
             <p>Write Python and run it in the browser.</p>
+          </div>
+          <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+
+        <a class="tile t-sky" href="Skyline%20Flight%20Sim.html" data-cursor="Open">
+          <div class="preview" aria-hidden="true"><div class="sky-pv"><div class="plane"></div></div></div>
+          <div class="tile-body">
+            <h3>Skyline Flight Sim</h3>
+            <p>Pick an aircraft, take off, fly and land. Paint your own livery in the hangar.</p>
+          </div>
+          <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+
+        <a class="tile t-m4" href="M4%20Coast%20Drive/index.html" data-cursor="Open">
+          <div class="preview" aria-hidden="true"><div class="coast-pv"></div></div>
+          <div class="tile-body">
+            <h3>M4 Coast Drive</h3>
+            <p>Cruise a BMW M4 along an open coast. Free roam or chase time trials.</p>
           </div>
           <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
         </a>
@@ -499,7 +534,7 @@ const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
 root.classList.add('js');
 
 /* ------------------------------------------------------------------
-   Edit this list when you add a project. Keys 1-5 and the terminal's
+   Edit this list when you add a project. Keys 1-7 and the terminal's
    "open" command both read from it.
 ------------------------------------------------------------------- */
 const PROJECTS = [
@@ -508,6 +543,8 @@ const PROJECTS = [
   { name: 'Python Code Studio', href: 'python-code-studio.html', key: '3', names: ['python', 'studio', 'pythoncodestudio'] },
   { name: 'Apex Rush',          href: 'Apex%20Rush.html',        key: '4', names: ['apex', 'apexrush', 'race', 'racing'] },
   { name: 'Voxel Craft',        href: 'Voxel%20Craft.html',      key: '5', names: ['voxel', 'voxelcraft', 'craft'] },
+  { name: 'Skyline Flight Sim', href: 'Skyline%20Flight%20Sim.html', key: '6', names: ['skyline', 'skylineflightsim', 'flight', 'flightsim', 'plane'] },
+  { name: 'M4 Coast Drive',     href: 'M4%20Coast%20Drive/index.html', key: '7', names: ['m4', 'm4coastdrive', 'coast', 'drive', 'pelago'] },
 ];
 const THEMES = ['ultramarine', 'plum', 'forest', 'ember'];
 
@@ -810,7 +847,7 @@ if (!reduce && finePointer) $$('.tile').forEach(t => {
   words.forEach(w => io.observe(w));
 })();
 
-/* ---------------- keyboard: 1-5 launch, Konami unlock ---------------- */
+/* ---------------- keyboard: 1-7 launch, Konami unlock ---------------- */
 const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 let kp = 0;
 addEventListener('keydown', ev => {
