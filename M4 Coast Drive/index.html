@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#182725"><title>Pelago Coast — BMW M4 Drive</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-mode="loading">
+  <canvas id="view" aria-label="Three-dimensional driving world"></canvas>
+  <header><div class="brand"><i class="logo"><b></b><b></b><b></b></i> COASTLINE <span>/</span> MOTOR CLUB</div><div class="issue">DRIVING ATLAS <span>VOL. 01</span></div></header>
+  <main id="intro" class="screen">
+    <div class="hero"><div class="kicker"><i></i> OPEN-WORLD DRIVING STUDY <span>№ 001</span></div>
+      <h1>Pelago<br><em>Coast.</em></h1>
+      <p>Take the M4 from the palm-lined harbour to the switchbacks of Serra Alta. The coast is yours.</p>
+      <button id="start" class="primary" disabled>Preparing car…</button>
+      <div class="hero-spec">BMW M4 COUPÉ <b>·</b> G82 <b>·</b> ISLE OF MAN GREEN</div>
+    </div><div class="intro-foot"><span>PC–01 &nbsp; / &nbsp; THE COASTAL EDITION</span><span>FREE ROAM &nbsp; + &nbsp; TIME TRIALS</span></div>
+  </main>
+  <section id="hud" aria-label="Driving instruments">
+    <div class="roadcard"><div class="kicker"><i></i><span id="activity">FREE ROAM</span></div><strong id="street">Palm Promenade</strong><small id="objective">PELAGO COAST</small></div>
+    <div class="tools"><button id="audio" aria-label="Toggle engine sound" title="Engine sound (V)">Sound <b>on</b></button><button id="pause" aria-label="Pause game">Ⅱ</button></div>
+    <button id="mini-button" aria-label="Open road atlas"><canvas id="mini" width="390" height="250"></canvas><span>ROAD ATLAS <b>M ↗</b></span></button>
+    <div class="dash"><div class="dashname"><i></i> M4 <span>G82</span></div><div class="readout"><b id="gear">N</b><strong id="speed">000</strong><span>KM/H</span></div><div class="tach"><i id="rpm"></i></div><div class="dashfoot"><span id="surface">ASPHALT</span><span id="trip">0.0 KM</span></div></div>
+    <div class="keyline"><kbd>WASD</kbd> drive <kbd>Space</kbd> handbrake <kbd>C</kbd> camera <kbd>R</kbd> recover</div>
+    <div id="touch"><div><button data-key="KeyA" aria-label="Steer left">◀</button><button data-key="KeyD" aria-label="Steer right">▶</button></div><div><button data-key="KeyS" aria-label="Brake or reverse">BRAKE</button><button data-key="KeyW" aria-label="Accelerate">GAS</button></div></div>
+  </section>
+  <aside id="toast" role="status"></aside>
+  <section id="pauseScreen" class="overlay"><div class="panel pause-panel"><div class="kicker"><i></i> PIT STOP</div><h2>Paused.</h2><p>W / ↑ to accelerate. S / ↓ to brake, then reverse. A and D steer. Space pulls the handbrake.</p><div class="menu"><button class="primary" id="resume">Resume drive →</button><button id="pauseMap">Road atlas & routes <b>M</b></button><button id="graphics">Graphics: Cinematic</button><button id="recover">Return to road <b>R</b></button><button id="cameraBtn">Change camera <b>C</b></button></div></div></section>
+  <section id="atlas" class="overlay"><div class="atlas-panel"><div class="atlas-head"><div><div class="kicker"><i></i> PELAGO / ROAD ATLAS</div><h2>The coast.</h2></div><button id="closeMap" aria-label="Close road atlas">Back to drive ↗</button></div>
+    <div class="atlas-body"><canvas id="map" width="800" height="750" aria-label="Map of the island roads and your location"></canvas><div class="routes"><div class="kicker">DRIVING ROUTES</div><p>Choose a time trial and drive through its marked gates. Your best time stays on this device.</p><div id="routeList"></div><button id="free">Free roam →</button><small><i class="pin"></i> Your M4 &nbsp; <i class="line"></i> Route</small></div></div>
+  </div></section>
+  <noscript>This driving game needs JavaScript enabled.</noscript>
+  <script defer src="assets/three-game.min.js"></script><script defer src="assets/m4.js"></script><script defer src="assets/coast-art.js"></script><script defer src="atmosphere.js"></script><script defer src="waterfront.js"></script><script defer src="world.js"></script><script defer src="drive.js"></script>
+</body></html>
